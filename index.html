@@ -1,0 +1,83 @@
+<html>
+    <head>
+        <title>Rocketseat Javascript - Exercício 03 - GITHUB - Search User Repos</title>
+    </head>
+    <body>
+        <div id="app">
+            <input type="text" name="user">
+            <button>Buscar Repos</button>
+            <ul></ul>
+        </div>
+    </body>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        const button = document.querySelector('#app button');
+        
+        function listRepos() {
+            const userName = document.querySelector('#app input').value;
+            if (userName === '') {
+                return;
+            }
+
+            getListRepos(userName);            
+        }
+
+        function renderLoadingBox() {
+            let loadingBox = document.createElement('span');
+            let textMsg = document.createTextNode('Carregando...');
+            loadingBox.appendChild(textMsg);
+
+            let root = document.querySelector('#app');
+            root.querySelector('ul').innerHTML = '';
+            root.appendChild(loadingBox);            
+        }
+
+        function removeLoadingBox() {
+            document.querySelector('#app span').remove();
+        }
+
+        function renderError(message) {
+            let errorBox = document.createElement('div');
+            errorBox.id = 'error';
+            errorBox.style.backgroundColor = 'red';
+            errorBox.style.color = 'white';
+            errorBox.style.padding = '10px';
+            errorBox.innerHTML = message;
+            document.querySelector('body').appendChild(errorBox);
+            setTimeout(() => {
+                document.querySelector('#error').remove();
+            }, 5000);
+        }
+
+        function renderRepoList(repoList) {
+            let list = document.querySelector('#app ul');            
+            list.innerHTML = '';
+            let repos = repoList || [];
+
+            repos.forEach(element => {
+                let li = document.createElement('li');
+                let liText = document.createTextNode(element.name);
+                li.appendChild(liText);
+                list.appendChild(li);
+            });            
+        }
+
+        async function getListRepos(userName) {
+            let urlRepos = `https://api.github.com/users/${userName}/repos`;
+            renderLoadingBox();
+            await axios.get(urlRepos)
+                .then(result => {
+                    if (result.status === 200) {
+                        renderRepoList(result.data);
+                    }                    
+                })
+                .catch(err => renderError('usuário não encontrado.'));
+            removeLoadingBox(); 
+        }
+
+        button.onclick = function() {
+            listRepos();
+        };      
+
+    </script>
+</html>
